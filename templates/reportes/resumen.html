@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load money %}
+{% block title %}Reportes{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <div class="section-title mb-0"><span class="dot"></span><h1 class="h3 mb-0">Reportes</h1></div>
+    <span class="stat-pill">{{ start }} → {{ end }}</span>
+</div>
+<form class="row g-2 mb-3" method="get">
+    <div class="col-md-3">
+        <select name="periodo" class="form-select">
+            <option value="dia" {% if period == 'dia' %}selected{% endif %}>Día</option>
+            <option value="semana" {% if period == 'semana' %}selected{% endif %}>Semana</option>
+            <option value="mes" {% if period == 'mes' %}selected{% endif %}>Mes</option>
+            <option value="semestre" {% if period == 'semestre' %}selected{% endif %}>Semestre</option>
+            <option value="anio" {% if period == 'anio' %}selected{% endif %}>Año</option>
+        </select>
+    </div>
+    <div class="col-auto"><button class="btn btn-accent" type="submit">Actualizar</button></div>
+</form>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card card-elevated fade-in"><div class="card-body"><h5>Total ingresos</h5><strong>{{ ingresos_total|money }}</strong></div></div>
+    </div>
+    <div class="col-md-6">
+        <div class="card card-elevated fade-in delay-1"><div class="card-body"><h5>Total gastos</h5><strong>{{ gastos_total|money }}</strong></div></div>
+    </div>
+</div>
+
+<div class="row mt-4 g-3">
+    <div class="col-md-6">
+        <div class="card card-elevated card-chart fade-in">
+            <div class="card-body">
+                <div class="section-title"><span class="dot"></span><h4 class="h5 mb-0">Ingresos por medio (barras)</h4></div>
+                <canvas id="chartIngresos"></canvas>
+            </div>
+        </div>
+        <div class="card card-elevated mt-3 fade-in">
+            <div class="card-body p-0 table-responsive">
+                <table class="table table-modern table-mobile mb-0">
+                    <thead><tr><th>Medio</th><th>Total</th></tr></thead>
+                    <tbody>
+                    {% for item in ingresos_por_medio %}
+                        <tr><td data-label="Medio">{{ item.payment_method }}</td><td data-label="Total">{{ item.total|money }}</td></tr>
+                    {% empty %}
+                        <tr><td colspan="2">Sin datos.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card card-elevated card-chart fade-in">
+            <div class="card-body">
+                <div class="section-title"><span class="dot"></span><h4 class="h5 mb-0">Gastos por categoría (torta)</h4></div>
+                <canvas id="chartGastos"></canvas>
+            </div>
+        </div>
+        <div class="card card-elevated mt-3 fade-in">
+            <div class="card-body p-0 table-responsive">
+                <table class="table table-modern table-mobile mb-0">
+                    <thead><tr><th>Categoría</th><th>Total</th></tr></thead>
+                    <tbody>
+                    {% for item in gastos_por_categoria %}
+                        <tr><td data-label="Categoría">{{ item.category }}</td><td data-label="Total">{{ item.total|money }}</td></tr>
+                    {% empty %}
+                        <tr><td colspan="2">Sin datos.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{{ ingresos_por_medio|json_script:"ingresos-data" }}
+{{ gastos_por_categoria|json_script:"gastos-data" }}
+<script>
+  const ingresoRaw = JSON.parse(document.getElementById('ingresos-data').textContent || '[]');
+  const gastoRaw = JSON.parse(document.getElementById('gastos-data').textContent || '[]');
+
+  const ingresoLabels = ingresoRaw.map(i => i.payment_method || 'Medio');
+  const ingresoValues = ingresoRaw.map(i => Number(i.total));
+  const gastoLabels = gastoRaw.map(g => g.category || 'Categoría');
+  const gastoValues = gastoRaw.map(g => Number(g.total));
+
+  const palette = ['#2dd4bf', '#f59e0b', '#60a5fa', '#34d399', '#f472b6', '#c084fc', '#fb7185'];
+
+  if (document.getElementById('chartIngresos')) {
+    new Chart(document.getElementById('chartIngresos'), {
+      type: 'bar',
+      data: {
+        labels: ingresoLabels,
+        datasets: [{
+          label: 'Ingresos',
+          data: ingresoValues,
+          backgroundColor: palette,
+          borderRadius: 10,
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: { x: { grid: { display: false } }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true } }
+      }
+    });
+  }
+
+  if (document.getElementById('chartGastos')) {
+    new Chart(document.getElementById('chartGastos'), {
+      type: 'pie',
+      data: {
+        labels: gastoLabels,
+        datasets: [{
+          data: gastoValues,
+          backgroundColor: palette,
+          borderWidth: 0
+        }]
+      },
+      options: {
+        plugins: { legend: { position: 'bottom', labels: { color: '#e6edf7' } } }
+      }
+    });
+  }
+</script>
+{% endblock %}

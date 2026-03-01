@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Cuentas por Mes{% endblock %}
+{% block content %}
+<h1>{{ page_title }}</h1>
+<div class="card card-elevated">
+    <div class="card-body">
+        <p class="text-muted">Si el cliente no paga entre el día 1 y el 8 del mes, el sistema aplica recargo automático del 20% al total a cobrar.</p>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-warning">{{ submit_label }}</button>
+            <a href="{% url 'cuentas-mes-list' %}" class="btn btn-outline-light">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

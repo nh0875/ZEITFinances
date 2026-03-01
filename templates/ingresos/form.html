@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Nuevo ingreso{% endblock %}
+{% block content %}
+<h1>Nuevo ingreso</h1>
+<form method="post" class="mt-3">{% csrf_token %}
+    {{ form|crispy }}
+    <button class="btn btn-success" type="submit">Guardar</button>
+    <a class="btn btn-link" href="/ingresos/">Volver</a>
+</form>
+{% endblock %}

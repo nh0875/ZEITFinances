@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: finanzas
+    env: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn finanzas.wsgi:application"
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_ALLOWED_HOSTS
+        value: "localhost,127.0.0.1"
+      - key: DJANGO_DEBUG
+        value: "false"
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_ID
+        sync: false
+    autoDeploy: true

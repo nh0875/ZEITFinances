@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load money %}
+{% block title %}Cuentas por Mes{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Cuentas por Mes</h1>
+    <a class="btn btn-warning" href="{% url 'cuentas-mes-nuevo' %}">Nueva cuenta</a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-sm-4 col-md-3">
+        <label class="form-label" for="mes">Filtrar por mes</label>
+        <input class="form-control" type="month" id="mes" name="mes" value="{{ selected_month }}">
+    </div>
+    <div class="col-sm-4 col-md-2 d-flex align-items-end">
+        <button class="btn btn-outline-light w-100" type="submit">Filtrar</button>
+    </div>
+    <div class="col-sm-4 col-md-2 d-flex align-items-end">
+        <a class="btn btn-outline-secondary w-100" href="{% url 'cuentas-mes-list' %}">Limpiar</a>
+    </div>
+</form>
+
+<table class="table table-striped table-mobile">
+    <thead>
+        <tr>
+            <th>Cliente</th>
+            <th>Contacto</th>
+            <th>Mes</th>
+            <th>Total factura</th>
+            <th>Total a cobrar</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for c in cuentas %}
+        <tr class="{% if c.has_late_fee and not c.is_paid %}table-danger{% elif c.is_paid %}table-success{% endif %}">
+            <td data-label="Cliente">
+                <strong>{{ c.client_name }}</strong>
+                {% if c.service_detail %}<div class="small text-muted">{{ c.service_detail }}</div>{% endif %}
+            </td>
+            <td data-label="Contacto">
+                <div>{{ c.client_phone }}</div>
+                {% if c.client_email %}<div class="small text-muted">{{ c.client_email }}</div>{% endif %}
+            </td>
+            <td data-label="Mes">{{ c.billing_month|date:"m/Y" }}</td>
+            <td data-label="Total factura">{{ c.base_amount|money }}</td>
+            <td data-label="Total a cobrar">
+                {% if c.has_late_fee %}
+                    <span class="badge bg-danger">+20%</span>
+                {% endif %}
+                {{ c.total_due|money }}
+            </td>
+            <td data-label="Estado">
+                {% if c.is_paid %}
+                    <span class="badge bg-success">Pagado{% if c.paid_at %} ({{ c.paid_at }}){% endif %}</span>
+                {% elif c.has_late_fee %}
+                    <span class="badge bg-danger">Impago con mora</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark">Pendiente (vence 8/{{ c.billing_month|date:"m" }})</span>
+                {% endif %}
+            </td>
+            <td data-label="Acciones">
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'cuentas-mes-editar' c.pk %}">Editar</a>
+            </td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="7">No hay cuentas cargadas.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

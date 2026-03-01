@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load money %}
+{% block title %}Ingresos{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Ingresos</h1>
+    <a class="btn btn-primary" href="{% url 'ingresos-nuevo' %}">Nuevo ingreso</a>
+</div>
+<table class="table table-striped table-mobile">
+    <thead><tr><th>Fecha</th><th>Monto</th><th>Medio</th><th>Origen</th><th>Notas</th><th></th></tr></thead>
+    <tbody>
+    {% for ingreso in ingresos %}
+        <tr>
+            <td data-label="Fecha">{{ ingreso.date }}</td>
+            <td data-label="Monto">{{ ingreso.amount|money }}</td>
+            <td data-label="Medio">{{ ingreso.get_payment_method_display }}</td>
+            <td data-label="Origen">{{ ingreso.get_origin_display }}</td>
+            <td data-label="Notas">{{ ingreso.notes }}</td>
+            <td class="text-end" data-label="Acciones">
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'ingresos-update' ingreso.pk %}">Editar</a>
+            </td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="6">Sin ingresos cargados.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

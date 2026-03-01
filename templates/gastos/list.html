@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load money %}
+{% block title %}Gastos{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Gastos</h1>
+    <a class="btn btn-danger" href="{% url 'gastos-nuevo' %}">Nuevo gasto</a>
+</div>
+<table class="table table-striped table-mobile">
+    <thead><tr><th>Fecha</th><th>Monto</th><th>Categoría</th><th>Medio</th><th>Descripción</th><th></th></tr></thead>
+    <tbody>
+    {% for gasto in gastos %}
+        <tr>
+            <td data-label="Fecha">{{ gasto.date }}</td>
+            <td data-label="Monto">{{ gasto.amount|money }}</td>
+            <td data-label="Categoría">{{ gasto.get_category_display }}</td>
+            <td data-label="Medio">{{ gasto.get_payment_method_display }}</td>
+            <td data-label="Descripción">{{ gasto.description }}</td>
+            <td class="text-end" data-label="Acciones">
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'gastos-update' gasto.pk %}">Editar</a>
+            </td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="6">Sin gastos cargados.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
