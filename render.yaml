@@ -3,8 +3,8 @@ services:
     name: finanzas
     env: python
     plan: free
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "sh -c 'python manage.py migrate && gunicorn finanzas.wsgi:application'"
+    buildCommand: "pip install -r requirements.txt && chmod +x start.sh"
+    startCommand: "./start.sh"
     envVars:
       - key: DJANGO_SECRET_KEY
         generateValue: true
